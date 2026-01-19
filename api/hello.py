@@ -3,15 +3,11 @@ from flask import Flask, jsonify
 app = Flask(__name__)
 
 @app.route('/')
-def hello():
-    """Simple hello endpoint to test Vercel deployment"""
+def handler():
+    """Simple hello endpoint"""
     return jsonify({
         'status': 'success',
-        'message': 'Hello from Vercel!',
+        'message': 'Hello from Vercel Python API!',
         'timestamp': '2026-01-19',
-        'endpoints': {
-            'home': '/',
-            'hello': '/api/hello',
-            'generate': '/api/generate'
-        }
+        'note': 'This endpoint is working correctly'
     })

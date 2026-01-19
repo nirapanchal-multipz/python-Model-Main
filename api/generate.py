@@ -2,9 +2,24 @@ from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-@app.route('/', methods=['POST'])
-def generate():
-    """Generate subtitles endpoint"""
+@app.route('/', methods=['GET', 'POST'])
+def handler():
+    if request.method == 'GET':
+        return jsonify({
+            'endpoint': '/api/generate',
+            'method': 'POST',
+            'description': 'Generate subtitles for a task',
+            'parameters': {
+                'task': 'string (required)',
+                'count': 'integer (optional, 1-5, default: 3)'
+            },
+            'example': {
+                'task': 'Go to gym at 7 PM',
+                'count': 3
+            }
+        })
+    
+    # POST request - generate subtitles
     try:
         data = request.get_json()
         
@@ -52,20 +67,3 @@ def generate():
             'status': 'error',
             'message': f'Internal server error: {str(e)}'
         }), 500
-
-@app.route('/', methods=['GET'])
-def info():
-    """Info about the generate endpoint"""
-    return jsonify({
-        'endpoint': '/api/generate',
-        'method': 'POST',
-        'description': 'Generate subtitles for a task',
-        'parameters': {
-            'task': 'string (required)',
-            'count': 'integer (optional, 1-5, default: 3)'
-        },
-        'example': {
-            'task': 'Go to gym at 7 PM',
-            'count': 3
-        }
-    })
