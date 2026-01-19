@@ -1,0 +1,9 @@
+# Minimal requirements for Vercel deployment
+flask>=2.3.0
+requests>=2.31.0
+pyspellchecker>=0.7.2
+numpy>=1.24.0
+python-dateutil>=2.8.2
+
+# Note: PyTorch and heavy ML libraries may cause deployment issues on Vercel
+# Consider using lighter alternatives or pre-trained models
