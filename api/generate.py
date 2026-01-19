@@ -1,49 +1,33 @@
-from flask import Flask, jsonify, request
+from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-def handler(request, response):
+@app.route('/', methods=['POST'])
+def generate():
     """Generate subtitles endpoint"""
-    if request.method != 'POST':
-        return {
-            'statusCode': 405,
-            'body': json.dumps({
-                'status': 'error',
-                'message': 'Method not allowed'
-            })
-        }
-    
     try:
-        import json
-        
-        # Parse request body
-        if hasattr(request, 'get_json'):
-            data = request.get_json()
-        else:
-            data = json.loads(request.body) if request.body else {}
+        data = request.get_json()
         
         if not data or 'task' not in data:
-            return {
-                'statusCode': 400,
-                'headers': {'Content-Type': 'application/json'},
-                'body': json.dumps({
-                    'status': 'error',
-                    'message': 'Missing required field: task'
-                })
-            }
+            return jsonify({
+                'status': 'error',
+                'message': 'Missing required field: task'
+            }), 400
         
         task = data['task'].strip()
         count = data.get('count', 3)
         
         if not task:
-            return {
-                'statusCode': 400,
-                'headers': {'Content-Type': 'application/json'},
-                'body': json.dumps({
-                    'status': 'error',
-                    'message': 'Task cannot be empty'
-                })
-            }
+            return jsonify({
+                'status': 'error',
+                'message': 'Task cannot be empty'
+            }), 400
+        
+        if count < 1 or count > 5:
+            return jsonify({
+                'status': 'error',
+                'message': 'Count must be between 1 and 5'
+            }), 400
         
         # Simple subtitle generation
         subtitles = [
@@ -54,25 +38,34 @@ def handler(request, response):
             f"💪 Action: {task}"
         ]
         
-        return {
-            'statusCode': 200,
-            'headers': {'Content-Type': 'application/json'},
-            'body': json.dumps({
-                'status': 'success',
-                'data': {
-                    'original_task': task,
-                    'subtitles': subtitles[:count],
-                    'count': len(subtitles[:count])
-                }
-            })
-        }
+        return jsonify({
+            'status': 'success',
+            'data': {
+                'original_task': task,
+                'subtitles': subtitles[:count],
+                'count': len(subtitles[:count])
+            }
+        })
         
     except Exception as e:
-        return {
-            'statusCode': 500,
-            'headers': {'Content-Type': 'application/json'},
-            'body': json.dumps({
-                'status': 'error',
-                'message': f'Internal server error: {str(e)}'
-            })
+        return jsonify({
+            'status': 'error',
+            'message': f'Internal server error: {str(e)}'
+        }), 500
+
+@app.route('/', methods=['GET'])
+def info():
+    """Info about the generate endpoint"""
+    return jsonify({
+        'endpoint': '/api/generate',
+        'method': 'POST',
+        'description': 'Generate subtitles for a task',
+        'parameters': {
+            'task': 'string (required)',
+            'count': 'integer (optional, 1-5, default: 3)'
+        },
+        'example': {
+            'task': 'Go to gym at 7 PM',
+            'count': 3
         }
+    })

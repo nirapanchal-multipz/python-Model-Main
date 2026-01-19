@@ -1,9 +1,23 @@
-from flask import Flask, jsonify, request
-import json
+from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-@app.route('/')
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def catch_all(path):
+    """Handle all routes"""
+    if request.method == 'POST' and path == 'generate':
+        return generate_subtitles()
+    elif path == 'generate' and request.method == 'GET':
+        return jsonify({
+            'status': 'error',
+            'message': 'Use POST method to generate subtitles'
+        }), 405
+    elif path == 'hello':
+        return hello()
+    else:
+        return home()
+
 def home():
     """Simple health check endpoint"""
     return jsonify({
@@ -13,13 +27,21 @@ def home():
         'endpoints': {
             'health': '/',
             'generate': '/api/generate',
-            'docs': '/api/docs'
+            'hello': '/api/hello'
         }
     })
 
-@app.route('/api/generate', methods=['POST'])
+def hello():
+    """Simple hello endpoint"""
+    return jsonify({
+        'status': 'success',
+        'message': 'Hello from Vercel!',
+        'timestamp': '2026-01-19',
+        'note': 'API is working correctly'
+    })
+
 def generate_subtitles():
-    """Generate subtitles - simplified version for Vercel"""
+    """Generate subtitles endpoint"""
     try:
         data = request.get_json()
         
@@ -38,19 +60,27 @@ def generate_subtitles():
                 'message': 'Task cannot be empty'
             }), 400
         
-        # Simple subtitle generation (without heavy ML models for Vercel)
-        simple_subtitles = [
+        if count < 1 or count > 5:
+            return jsonify({
+                'status': 'error',
+                'message': 'Count must be between 1 and 5'
+            }), 400
+        
+        # Simple subtitle generation
+        subtitles = [
             f"📝 Task: {task}",
             f"⏰ Reminder: {task}",
-            f"✅ Don't forget: {task}"
+            f"✅ Don't forget: {task}",
+            f"🎯 Focus: {task}",
+            f"💪 Action: {task}"
         ]
         
         return jsonify({
             'status': 'success',
             'data': {
                 'original_task': task,
-                'subtitles': simple_subtitles[:count],
-                'count': len(simple_subtitles[:count]),
+                'subtitles': subtitles[:count],
+                'count': len(subtitles[:count]),
                 'note': 'Simplified version for Vercel deployment'
             }
         })
@@ -60,32 +90,3 @@ def generate_subtitles():
             'status': 'error',
             'message': f'Internal server error: {str(e)}'
         }), 500
-
-@app.route('/api/docs')
-def api_docs():
-    """API documentation"""
-    return jsonify({
-        'title': 'AI Subtitle Generator API',
-        'version': '1.0.0',
-        'description': 'Generate subtitles for tasks',
-        'endpoints': {
-            'POST /api/generate': {
-                'description': 'Generate subtitles for a task',
-                'parameters': {
-                    'task': 'string (required) - The task description',
-                    'count': 'integer (optional, 1-5) - Number of subtitles (default: 3)'
-                },
-                'example': {
-                    'task': 'Go to gym at 7 PM',
-                    'count': 3
-                }
-            }
-        }
-    })
-
-# Vercel serverless function handler
-def handler(request, response):
-    return app(request, response)
-
-if __name__ == '__main__':
-    app.run(debug=True)
