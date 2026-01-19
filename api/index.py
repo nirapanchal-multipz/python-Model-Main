@@ -2,9 +2,7 @@ from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-@app.route('/', defaults={'path': ''})
-@app.route('/<path:path>')
-def handler(path):
+def handler(request):
     """Main handler for all routes"""
     return jsonify({
         'status': 'success',

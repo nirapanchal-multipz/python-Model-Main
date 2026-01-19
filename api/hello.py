@@ -2,8 +2,7 @@ from flask import Flask, jsonify
 
 app = Flask(__name__)
 
-@app.route('/')
-def handler():
+def handler(request):
     """Simple hello endpoint"""
     return jsonify({
         'status': 'success',
