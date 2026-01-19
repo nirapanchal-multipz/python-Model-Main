@@ -12,6 +12,14 @@
       "dest": "/api/generate.py"
     },
     {
+      "src": "/api/smart",
+      "dest": "/api/smart_generate.py"
+    },
+    {
+      "src": "/api/model",
+      "dest": "/api/model_handler.py"
+    },
+    {
       "src": "/api/hello",
       "dest": "/api/hello.py"
     },
