@@ -15,12 +15,33 @@ class handler(BaseHTTPRequestHandler):
             'endpoints': {
                 'home': '/',
                 'hello': '/api/hello',
-                'generate': '/api/generate (POST)'
+                'generate': '/api/generate (POST)',
+                'smart': '/api/smart (POST)',
+                'tflite': '/api/tflite (POST)',
+                'tflite_test': '/api/tflite_test (POST)',
+                'pytorch': '/api/pytorch (POST)',
+                'model': '/api/model (POST)'
             },
             'usage': {
                 'generate_subtitles': {
                     'method': 'POST',
                     'url': '/api/generate',
+                    'example_body': {
+                        'task': 'Go to gym at 7 PM',
+                        'count': 3
+                    }
+                },
+                'tflite_subtitles': {
+                    'method': 'POST',
+                    'url': '/api/tflite',
+                    'example_body': {
+                        'task': 'Go to gym at 7 PM',
+                        'count': 3
+                    }
+                },
+                'smart_subtitles': {
+                    'method': 'POST',
+                    'url': '/api/smart',
                     'example_body': {
                         'task': 'Go to gym at 7 PM',
                         'count': 3
