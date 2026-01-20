@@ -5,27 +5,35 @@ import random
 
 class handler(BaseHTTPRequestHandler):
     def do_GET(self):
-        self.send_response(200)
-        self.send_header('Content-type', 'application/json')
-        self.send_header('Access-Control-Allow-Origin', '*')
-        self.end_headers()
-        
-        response = {
-            "endpoint": "/api/tflite",
-            "method": "POST",
-            "description": "TensorFlow Lite powered subtitle generation",
-            "status": "working",
-            "parameters": {
-                "task": "string (required) - Your task description",
-                "count": "integer (optional, 1-5, default: 3) - Number of subtitles"
-            },
-            "example": {
-                "task": "Go to gym at 7 PM tomorrow",
-                "count": 3
+        try:
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            
+            response = {
+                "endpoint": "/api/tflite",
+                "method": "POST",
+                "description": "TensorFlow Lite powered subtitle generation",
+                "status": "working",
+                "parameters": {
+                    "task": "string (required) - Your task description",
+                    "count": "integer (optional, 1-5, default: 3) - Number of subtitles"
+                },
+                "example": {
+                    "task": "Go to gym at 7 PM tomorrow",
+                    "count": 3
+                }
             }
-        }
-        
-        self.wfile.write(json.dumps(response).encode())
+            
+            self.wfile.write(json.dumps(response).encode('utf-8'))
+        except Exception as e:
+            self.send_response(500)
+            self.send_header('Content-type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            error_response = {"error": str(e)}
+            self.wfile.write(json.dumps(error_response).encode('utf-8'))
     
     def do_POST(self):
         try:
@@ -36,7 +44,6 @@ class handler(BaseHTTPRequestHandler):
             else:
                 data = {}
             
-            # Validate input
             if not data or 'task' not in data:
                 self.send_error_response(400, 'Missing required field: task')
                 return
@@ -147,7 +154,7 @@ class handler(BaseHTTPRequestHandler):
             self.wfile.write(json.dumps(response).encode('utf-8'))
             
         except Exception as e:
-            self.send_error_response(500, f'Generation error: {str(e)}')
+            self.send_error_response(500, f'TFLite generation error: {str(e)}')
     
     def do_OPTIONS(self):
         self.send_response(200)
@@ -157,14 +164,19 @@ class handler(BaseHTTPRequestHandler):
         self.end_headers()
     
     def send_error_response(self, status_code, message):
-        self.send_response(status_code)
-        self.send_header('Content-type', 'application/json')
-        self.send_header('Access-Control-Allow-Origin', '*')
-        self.end_headers()
-        
-        error_response = {
-            "status": "error",
-            "message": message
-        }
-        
-        self.wfile.write(json.dumps(error_response).encode('utf-8'))
+        try:
+            self.send_response(status_code)
+            self.send_header('Content-type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            
+            error_response = {
+                "status": "error",
+                "message": message
+            }
+            
+            self.wfile.write(json.dumps(error_response).encode('utf-8'))
+        except Exception as e:
+            self.send_response(500)
+            self.end_headers()
+            self.wfile.write(b'{"error": "Server error"}')
