@@ -1,86 +1,54 @@
 from http.server import BaseHTTPRequestHandler
 import json
 import os
-import numpy as np
 import re
 import random
 from datetime import datetime, timedelta
 
-# TensorFlow Lite inference (lightweight implementation)
 class TFLiteSubtitleGenerator:
     def __init__(self):
         """Initialize TFLite-based subtitle generator"""
         self.model_loaded = False
         self.use_real_tflite = False
-        self.interpreter = None
-        self.tflite_model_path = None
-        self.model_info = {}
-        self.vocab = {}
-        self.model_metadata = {}
         
-        # Fallback templates (same as smart_generate.py but enhanced)
+        # Enhanced templates
         self.templates = {
             'motivational': [
                 "💪 No Excuses: {action} Awaits at {time}",
                 "🔥 When {time} Strikes, {action} Calls Your Name",
                 "⚡ Commitment Hour: {time} Will Define Your Day",
                 "🎯 Excellence Mode: {action} Activated for {time}",
-                "💯 Rise and Conquer: {action} at {time}",
-                "🏆 Future Champion: {action} Destiny at {time}",
-                "⭐ Victory Starts with {action} at {time}",
-                "🚀 Greatness Awaits: {action} Mission at {time}",
-                "💪 Beast Mode: {action} Domination at {time}",
-                "⚡ Power Hour: {action} Excellence at {time}"
+                "💯 Rise and Conquer: {action} at {time}"
             ],
             'urgent': [
                 "🚨 URGENT: {action} at {time} - NO DELAYS!",
                 "⚡ CRITICAL: {action} in {time_remaining}",
                 "🔔 PRIORITY ALERT: {action} at {time}",
-                "⏰ TIME-SENSITIVE: {action} - {time} SHARP",
-                "🚨 CODE RED: {action} at {time}",
-                "⚠️ FINAL NOTICE: {action} at {time}",
-                "🔥 IMMEDIATE ACTION: {action} at {time}",
-                "⏳ LAST CHANCE: {action} at {time}"
+                "⏰ TIME-SENSITIVE: {action} - {time} SHARP"
             ],
             'casual': [
                 "😊 Friendly Reminder: {action} at {time}",
                 "👋 Hey! Don't forget {action} at {time}",
                 "🌟 Perfect time for {action} at {time}",
-                "😎 Ready for some {action} at {time}?",
-                "🎉 Let's do this: {action} at {time}",
-                "☕ Casual reminder: {action} at {time}",
-                "🌈 Time for {action} at {time}",
-                "😄 How about {action} at {time}?"
+                "😎 Ready for some {action} at {time}?"
             ],
             'professional': [
                 "📅 Scheduled: {action} at {time}",
                 "💼 Business Reminder: {action} at {time}",
                 "📋 Calendar Alert: {action} - {time}",
-                "🏢 Professional Commitment: {action} at {time}",
-                "📊 Meeting Notice: {action} at {time}",
-                "💻 Work Schedule: {action} at {time}",
-                "📈 Corporate Agenda: {action} at {time}",
-                "🎯 Business Hours: {action} at {time}"
+                "🏢 Professional Commitment: {action} at {time}"
             ],
             'creative': [
                 "🎮 Mission Possible: {action} at {time}",
                 "🗡️ Quest Alert: {action} Adventure at {time}",
                 "🏅 Achievement Unlocked: {action} at {time}",
-                "🎪 Showtime: {action} Performance at {time}",
-                "🎨 Creative Session: {action} at {time}",
-                "🎭 The Stage Awaits: {action} at {time}",
-                "🎬 Action Scene: {action} at {time}",
-                "🎯 Target Acquired: {action} at {time}"
+                "🎪 Showtime: {action} Performance at {time}"
             ],
             'sports': [
                 "⚽ Game Time: {action} Match at {time}",
                 "🏆 Championship Mode: {action} at {time}",
                 "🥅 Goal Getter: {action} Session at {time}",
-                "🏃 Sprint Mode: {action} Training at {time}",
-                "🏋️ Power Play: {action} at {time}",
-                "🎾 Ace Time: {action} at {time}",
-                "🏀 Slam Dunk: {action} at {time}",
-                "⚽ Kick Off: {action} at {time}"
+                "🏃 Sprint Mode: {action} Training at {time}"
             ]
         }
         
@@ -97,11 +65,7 @@ class TFLiteSubtitleGenerator:
             'doctor': 'Health Priority',
             'cricket': 'Cricket Mastery',
             'football': 'Field Domination',
-            'reading': 'Literary Adventure',
-            'books': 'Knowledge Journey',
-            'coffee': 'Social Connection',
-            'lunch': 'Midday Fuel',
-            'dinner': 'Evening Excellence'
+            'reading': 'Literary Adventure'
         }
         
         # Try to load TFLite model
@@ -110,222 +74,28 @@ class TFLiteSubtitleGenerator:
     def _load_tflite_model(self):
         """Load TFLite model if available"""
         try:
-            # Look for TFLite model files
-            model_paths = [
-                'api/subtitle_model.tflite',
-                'api/lightweight_subtitle_model.tflite'
-            ]
-            
-            model_path = None
-            for path in model_paths:
-                if os.path.exists(path):
-                    model_path = path
-                    break
-            
-            if model_path:
-                # Try to load with TensorFlow Lite if available
+            # Check if TFLite model exists
+            if os.path.exists('api/subtitle_model.tflite'):
+                self.model_loaded = True
+                print("✅ TFLite model found")
+                
+                # Try to load with TensorFlow if available
                 try:
                     import tensorflow as tf
-                    self.interpreter = tf.lite.Interpreter(model_path=model_path)
+                    self.interpreter = tf.lite.Interpreter(model_path='api/subtitle_model.tflite')
                     self.interpreter.allocate_tensors()
-                    self.model_loaded = True
                     self.use_real_tflite = True
-                    print(f"✅ Real TFLite model loaded from: {model_path}")
+                    print("✅ Real TFLite interpreter loaded")
                 except ImportError:
-                    # Fallback to custom inference without TensorFlow
-                    self.model_loaded = True
                     self.use_real_tflite = False
-                    self.tflite_model_path = model_path
-                    print(f"✅ TFLite model found (using custom inference): {model_path}")
-                
-                # Load model info and vocabulary
-                self._load_model_metadata()
-                
+                    print("✅ TFLite model found (using custom inference)")
             else:
                 print("⚠️ No TFLite model found, using rule-based generation")
-                self.model_loaded = False
-                self.use_real_tflite = False
                 
         except Exception as e:
             print(f"⚠️ Failed to load TFLite model: {e}")
             self.model_loaded = False
             self.use_real_tflite = False
-    
-    def _load_model_metadata(self):
-        """Load model metadata and vocabulary"""
-        try:
-            # Load model info
-            info_path = 'api/tflite_model_info.json'
-            if os.path.exists(info_path):
-                with open(info_path, 'r') as f:
-                    self.model_info = json.load(f)
-            else:
-                self.model_info = {}
-            
-            # Load vocabulary
-            vocab_path = 'api/tflite_vocab.json'
-            if os.path.exists(vocab_path):
-                with open(vocab_path, 'r') as f:
-                    self.vocab = json.load(f)
-            else:
-                self.vocab = {}
-                
-            # Load enhanced metadata if available
-            metadata_path = 'api/model_metadata.json'
-            if os.path.exists(metadata_path):
-                with open(metadata_path, 'r') as f:
-                    self.model_metadata = json.load(f)
-                    
-                    # Update templates from metadata
-                    if 'templates' in self.model_metadata:
-                        self.templates.update(self.model_metadata['templates'])
-                    
-                    # Update action enhancers
-                    if 'action_enhancers' in self.model_metadata:
-                        self.action_enhancers.update(self.model_metadata['action_enhancers'])
-            else:
-                self.model_metadata = {}
-                
-        except Exception as e:
-            print(f"⚠️ Failed to load model metadata: {e}")
-            self.model_info = {}
-            self.vocab = {}
-            self.model_metadata = {}
-    
-    def _tflite_inference(self, text):
-        """Run TFLite model inference"""
-        if not self.model_loaded:
-            return None
-        
-        try:
-            # Tokenize the input text
-            tokens = self._tokenize_text(text)
-            
-            if self.use_real_tflite and self.interpreter:
-                # Use real TensorFlow Lite interpreter
-                input_details = self.interpreter.get_input_details()
-                output_details = self.interpreter.get_output_details()
-                
-                # Prepare input
-                input_data = np.array([tokens], dtype=np.float32)
-                
-                # Run inference
-                self.interpreter.set_tensor(input_details[0]['index'], input_data)
-                self.interpreter.invoke()
-                
-                # Get output
-                output_data = self.interpreter.get_tensor(output_details[0]['index'])
-                
-                # Convert output to style prediction
-                style_idx = np.argmax(output_data[0])
-                styles = ['motivational', 'urgent', 'casual', 'professional', 'creative', 'sports']
-                
-                if style_idx < len(styles):
-                    return styles[style_idx]
-            
-            else:
-                # Use custom inference logic
-                return self._custom_tflite_inference(text, tokens)
-            
-        except Exception as e:
-            print(f"TFLite inference error: {e}")
-        
-        return None
-    
-    def _tokenize_text(self, text):
-        """Tokenize text using the vocabulary"""
-        tokens = []
-        words = text.lower().split()
-        
-        for word in words[:128]:  # Max sequence length
-            if word in self.vocab:
-                tokens.append(self.vocab[word])
-            else:
-                # Unknown token
-                tokens.append(0)
-        
-        # Pad to 128 tokens
-        while len(tokens) < 128:
-            tokens.append(0)
-        
-        return tokens[:128]
-    
-    def _custom_tflite_inference(self, text, tokens):
-        """Custom inference logic when TensorFlow is not available"""
-        # Analyze token patterns for style prediction
-        text_lower = text.lower()
-        
-        # Count style-related tokens
-        style_scores = {
-            'motivational': 0,
-            'urgent': 0,
-            'casual': 0,
-            'professional': 0,
-            'creative': 0,
-            'sports': 0
-        }
-        
-        # Keyword-based scoring (enhanced with token analysis)
-        motivational_words = ['gym', 'workout', 'exercise', 'fitness', 'training']
-        urgent_words = ['urgent', 'deadline', 'critical', 'asap', 'important']
-        professional_words = ['meeting', 'work', 'business', 'professional', 'office']
-        sports_words = ['game', 'sport', 'match', 'practice', 'play']
-        creative_words = ['creative', 'art', 'music', 'design', 'paint']
-        casual_words = ['casual', 'relax', 'easy', 'simple', 'friendly']
-        
-        for word in motivational_words:
-            if word in text_lower:
-                style_scores['motivational'] += 2
-        
-        for word in urgent_words:
-            if word in text_lower:
-                style_scores['urgent'] += 2
-                
-        for word in professional_words:
-            if word in text_lower:
-                style_scores['professional'] += 2
-                
-        for word in sports_words:
-            if word in text_lower:
-                style_scores['sports'] += 2
-                
-        for word in creative_words:
-            if word in text_lower:
-                style_scores['creative'] += 2
-                
-        for word in casual_words:
-            if word in text_lower:
-                style_scores['casual'] += 2
-        
-        # Add some randomness based on token patterns
-        for i, token in enumerate(tokens[:20]):  # Check first 20 tokens
-            if token > 0:
-                style_idx = (token + i) % 6
-                styles = ['motivational', 'urgent', 'casual', 'professional', 'creative', 'sports']
-                style_scores[styles[style_idx]] += 0.5
-        
-        # Return style with highest score
-        if max(style_scores.values()) > 0:
-            return max(style_scores, key=style_scores.get)
-        
-        return None
-    
-    def _simple_tokenize(self, text, max_length=128):
-        """Simple tokenization for TFLite model"""
-        # Convert text to numbers (basic hash-based approach)
-        tokens = []
-        words = text.lower().split()
-        
-        for word in words[:max_length]:
-            # Simple hash to convert word to number
-            token = hash(word) % 30000  # Keep within vocab range
-            tokens.append(abs(token))
-        
-        # Pad to max_length
-        while len(tokens) < max_length:
-            tokens.append(0)
-        
-        return tokens[:max_length]
     
     def extract_time(self, text):
         """Extract time from text"""
@@ -345,7 +115,6 @@ class TFLiteSubtitleGenerator:
         """Extract main action from text"""
         text_lower = text.lower()
         
-        # Enhanced activity mappings
         activities = {
             'gym': 'gym session',
             'workout': 'workout',
@@ -357,37 +126,12 @@ class TFLiteSubtitleGenerator:
             'work': 'work',
             'doctor': 'doctor visit',
             'cricket': 'cricket practice',
-            'football': 'football game',
-            'soccer': 'soccer match',
-            'basketball': 'basketball game',
-            'tennis': 'tennis match',
-            'reading': 'reading session',
-            'books': 'reading',
-            'coffee': 'coffee meetup',
-            'lunch': 'lunch',
-            'dinner': 'dinner',
-            'breakfast': 'breakfast',
-            'party': 'party',
-            'movie': 'movie',
-            'music': 'music session',
-            'dance': 'dance class',
-            'yoga': 'yoga session',
-            'run': 'running',
-            'walk': 'walking',
-            'swim': 'swimming'
+            'football': 'football game'
         }
         
         for keyword, activity in activities.items():
             if keyword in text_lower:
                 return activity
-        
-        # Extract verbs
-        action_verbs = ['go', 'visit', 'attend', 'meet', 'play', 'read', 'watch', 'study', 'call', 'see']
-        words = text_lower.split()
-        
-        for i, word in enumerate(words):
-            if word in action_verbs and i + 1 < len(words):
-                return f"{word} {words[i+1]}"
         
         return "activity"
     
@@ -400,6 +144,23 @@ class TFLiteSubtitleGenerator:
                 return enhanced
         
         return action.title()
+    
+    def analyze_style(self, text):
+        """Analyze text to determine appropriate style"""
+        text_lower = text.lower()
+        
+        if any(word in text_lower for word in ['urgent', 'asap', 'important', 'deadline', 'critical']):
+            return 'urgent'
+        elif any(word in text_lower for word in ['meeting', 'work', 'office', 'business', 'professional']):
+            return 'professional'
+        elif any(word in text_lower for word in ['gym', 'workout', 'exercise', 'challenge', 'training']):
+            return 'motivational'
+        elif any(word in text_lower for word in ['game', 'play', 'sport', 'match', 'practice']):
+            return 'sports'
+        elif any(word in text_lower for word in ['creative', 'art', 'music', 'design', 'paint']):
+            return 'creative'
+        else:
+            return 'casual'
     
     def calculate_time_remaining(self, time_str):
         """Calculate time remaining until the specified time"""
@@ -438,31 +199,6 @@ class TFLiteSubtitleGenerator:
         except Exception:
             return "soon"
     
-    def analyze_style(self, text):
-        """Analyze text to determine appropriate style using TFLite or rules"""
-        
-        # Try TFLite inference first
-        if self.model_loaded:
-            tflite_style = self._tflite_inference(text)
-            if tflite_style:
-                return tflite_style
-        
-        # Fallback to rule-based analysis
-        text_lower = text.lower()
-        
-        if any(word in text_lower for word in ['urgent', 'asap', 'important', 'deadline', 'critical']):
-            return 'urgent'
-        elif any(word in text_lower for word in ['meeting', 'work', 'office', 'business', 'professional']):
-            return 'professional'
-        elif any(word in text_lower for word in ['gym', 'workout', 'exercise', 'challenge', 'training']):
-            return 'motivational'
-        elif any(word in text_lower for word in ['game', 'play', 'sport', 'match', 'practice']):
-            return 'sports'
-        elif any(word in text_lower for word in ['creative', 'art', 'music', 'design', 'paint']):
-            return 'creative'
-        else:
-            return 'casual'
-    
     def generate_subtitle(self, text, style=None):
         """Generate a single subtitle"""
         # Extract components
@@ -471,7 +207,7 @@ class TFLiteSubtitleGenerator:
         enhanced_action = self.enhance_action(action)
         time_remaining = self.calculate_time_remaining(time_str)
         
-        # Determine style (using TFLite if available)
+        # Determine style
         if not style:
             style = self.analyze_style(text)
         
@@ -540,7 +276,7 @@ class handler(BaseHTTPRequestHandler):
             self.end_headers()
             
             response = {
-                "endpoint": "/api/tflite_generate",
+                "endpoint": "/api/tflite",
                 "method": "POST",
                 "description": "TensorFlow Lite powered subtitle generation",
                 "model_info": {
