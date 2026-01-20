@@ -24,6 +24,10 @@
       "dest": "/api/tflite_test.py"
     },
     {
+      "src": "/api/tflite_simple",
+      "dest": "/api/tflite_simple.py"
+    },
+    {
       "src": "/api/pytorch",
       "dest": "/api/pytorch_generate.py"
     },
