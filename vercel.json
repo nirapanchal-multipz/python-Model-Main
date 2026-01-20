@@ -20,6 +20,10 @@
       "dest": "/api/tflite_generate.py"
     },
     {
+      "src": "/api/tflite_test",
+      "dest": "/api/tflite_test.py"
+    },
+    {
       "src": "/api/pytorch",
       "dest": "/api/pytorch_generate.py"
     },
