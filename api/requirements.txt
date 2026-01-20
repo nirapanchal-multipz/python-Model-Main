@@ -1,1 +1,6 @@
-# No external dependencies needed for basic HTTP server
+# TensorFlow Lite requirements for Vercel deployment
+tensorflow-cpu==2.13.0
+numpy>=1.21.0
+python-dateutil>=2.8.2
+
+# Note: TensorFlow Lite model with fallback to custom inference

@@ -16,6 +16,14 @@
       "dest": "/api/smart_generate.py"
     },
     {
+      "src": "/api/tflite",
+      "dest": "/api/tflite_generate.py"
+    },
+    {
+      "src": "/api/pytorch",
+      "dest": "/api/pytorch_generate.py"
+    },
+    {
       "src": "/api/model",
       "dest": "/api/model_handler.py"
     },
@@ -27,5 +35,10 @@
       "src": "/(.*)",
       "dest": "/api/index.py"
     }
-  ]
+  ],
+  "functions": {
+    "api/*.py": {
+      "maxDuration": 30
+    }
+  }
 }

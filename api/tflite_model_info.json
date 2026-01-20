@@ -1,0 +1,21 @@
+{
+  "model_type": "tensorflow_lite_binary",
+  "version": "1.0",
+  "input_shape": [1, 128],
+  "output_shape": [1, 6],
+  "vocab_size": 1000,
+  "max_sequence_length": 128,
+  "num_classes": 6,
+  "classes": [
+    "motivational",
+    "urgent", 
+    "casual",
+    "professional",
+    "creative",
+    "sports"
+  ],
+  "model_size_mb": 0.001,
+  "file_structure": "Custom TFLite binary format",
+  "inference_ready": true,
+  "description": "Lightweight TensorFlow Lite model for subtitle style classification"
+}

@@ -1,0 +1,124 @@
+{
+  "model_type": "rule_based_with_ai_enhancement",
+  "version": "1.0",
+  "categories": [
+    "motivational",
+    "urgent",
+    "casual",
+    "professional",
+    "creative",
+    "sports"
+  ],
+  "features": [
+    "time_extraction",
+    "action_enhancement",
+    "style_detection",
+    "template_generation"
+  ],
+  "templates": {
+    "motivational": [
+      "\ud83d\udcaa No Excuses: {action} Awaits at {time}",
+      "\ud83d\udd25 When {time} Strikes, {action} Calls Your Name",
+      "\u26a1 Commitment Hour: {time} Will Define Your Day",
+      "\ud83c\udfaf Excellence Mode: {action} Activated for {time}",
+      "\ud83d\udcaf Rise and Conquer: {action} at {time}"
+    ],
+    "urgent": [
+      "\ud83d\udea8 URGENT: {action} at {time} - NO DELAYS!",
+      "\u26a1 CRITICAL: {action} in {time_remaining}",
+      "\ud83d\udd14 PRIORITY ALERT: {action} at {time}",
+      "\u23f0 TIME-SENSITIVE: {action} - {time} SHARP"
+    ],
+    "casual": [
+      "\ud83d\ude0a Friendly Reminder: {action} at {time}",
+      "\ud83d\udc4b Hey! Don't forget {action} at {time}",
+      "\ud83c\udf1f Perfect time for {action} at {time}",
+      "\ud83d\ude0e Ready for some {action} at {time}?"
+    ],
+    "professional": [
+      "\ud83d\udcc5 Scheduled: {action} at {time}",
+      "\ud83d\udcbc Business Reminder: {action} at {time}",
+      "\ud83d\udccb Calendar Alert: {action} - {time}",
+      "\ud83c\udfe2 Professional Commitment: {action} at {time}"
+    ],
+    "creative": [
+      "\ud83c\udfae Mission Possible: {action} at {time}",
+      "\ud83d\udde1\ufe0f Quest Alert: {action} Adventure at {time}",
+      "\ud83c\udfc5 Achievement Unlocked: {action} at {time}",
+      "\ud83c\udfaa Showtime: {action} Performance at {time}"
+    ],
+    "sports": [
+      "\u26bd Game Time: {action} Match at {time}",
+      "\ud83c\udfc6 Championship Mode: {action} at {time}",
+      "\ud83e\udd45 Goal Getter: {action} Session at {time}",
+      "\ud83c\udfc3 Sprint Mode: {action} Training at {time}"
+    ]
+  },
+  "action_enhancers": {
+    "gym": "Fitness Challenge",
+    "workout": "Power Session",
+    "exercise": "Physical Excellence",
+    "meeting": "Professional Excellence",
+    "study": "Knowledge Quest",
+    "shopping": "Mission Success",
+    "appointment": "Scheduled Victory",
+    "work": "Career Advancement",
+    "doctor": "Health Priority",
+    "cricket": "Cricket Mastery",
+    "football": "Field Domination",
+    "reading": "Literary Adventure"
+  },
+  "style_keywords": {
+    "motivational": [
+      "gym",
+      "workout",
+      "exercise",
+      "challenge",
+      "training",
+      "fitness"
+    ],
+    "urgent": [
+      "urgent",
+      "asap",
+      "important",
+      "deadline",
+      "critical",
+      "emergency"
+    ],
+    "professional": [
+      "meeting",
+      "work",
+      "office",
+      "business",
+      "professional",
+      "corporate"
+    ],
+    "sports": [
+      "game",
+      "play",
+      "sport",
+      "match",
+      "practice",
+      "team",
+      "cricket",
+      "football"
+    ],
+    "creative": [
+      "creative",
+      "art",
+      "music",
+      "design",
+      "paint",
+      "write",
+      "draw"
+    ],
+    "casual": [
+      "casual",
+      "relax",
+      "fun",
+      "easy",
+      "simple",
+      "friendly"
+    ]
+  }
+}
